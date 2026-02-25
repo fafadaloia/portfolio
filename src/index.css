@@ -1,0 +1,156 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  .font-faculty-glyphic {
+    font-family: 'Faculty Glyphic', sans-serif;
+    font-weight: 400;
+    font-style: normal;
+  }
+
+  :root {
+    color-scheme: light;
+  }
+
+  body {
+    @apply bg-lightBg text-lightText font-sans antialiased min-h-screen transition-colors duration-300 ease-in-out;
+  }
+
+  .dark body {
+    @apply bg-darkBg text-darkText;
+  }
+
+  a {
+    @apply text-linkLight transition-colors duration-200;
+  }
+
+  a:hover {
+    @apply text-accent;
+  }
+
+  .dark a {
+    @apply text-linkDark;
+  }
+
+  .dark a:hover {
+    @apply text-primary;
+  }
+
+  /* Excepción: links dentro del editor NO deben heredar text-decoration: none */
+  /* Usar border-bottom como alternativa visual ya que text-decoration puede ser sobrescrito */
+  [contenteditable="true"] a,
+  div[contenteditable] a,
+  [contenteditable] a,
+  [contenteditable="true"] a.blog-link,
+  div[contenteditable] a.blog-link,
+  [contenteditable] a.blog-link {
+    text-decoration: underline !important;
+    text-decoration-line: underline !important;
+    border-bottom: 1px solid currentColor !important;
+  }
+}
+
+@layer components {
+  .btn-gradient {
+    @apply inline-flex items-center justify-center gap-2 rounded-md bg-gradient-to-r from-buttonLightFrom to-buttonLightTo px-6 py-3 text-buttonTextLight font-medium shadow-md transition-transform duration-200 ease-in-out hover:scale-[1.02] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-buttonLightFrom;
+  }
+
+  .btn-gradient:hover {
+    @apply text-buttonTextLight;
+  }
+
+  .dark .btn-gradient {
+    @apply from-buttonDarkFrom to-buttonDarkTo text-buttonTextDark;
+  }
+
+  .dark .btn-gradient:hover {
+    @apply text-buttonTextDark;
+  }
+
+  /* Editor de texto enriquecido */
+  [contenteditable]:empty:before {
+    content: attr(placeholder);
+    color: rgb(156 163 175);
+    pointer-events: none;
+  }
+
+  .dark [contenteditable]:empty:before {
+    color: rgb(107 114 128);
+  }
+
+  [contenteditable]:focus {
+    outline: none;
+  }
+
+  /* Estilos para imágenes del blog */
+  .blog-image-container {
+    margin: 1rem 0;
+  }
+
+  .blog-image-container img {
+    width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    display: block;
+  }
+
+  .blog-image-caption {
+    font-size: 0.875rem;
+    font-style: italic;
+    opacity: 0.7;
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+
+  /* Estilos para links en el editor de blog - MÁXIMA PRIORIDAD */
+  /* Usar pseudo-elemento ::after para crear subrayado ya que otros métodos están siendo sobrescritos */
+  div[contenteditable="true"] a.blog-link,
+  div[contenteditable] a.blog-link,
+  [contenteditable="true"] a.blog-link,
+  [contenteditable] a.blog-link,
+  div[contenteditable="true"] a[href],
+  div[contenteditable] a[href],
+  [contenteditable="true"] a[href],
+  [contenteditable] a[href] {
+    position: relative !important;
+    text-decoration: underline !important;
+    text-decoration-line: underline !important;
+    text-decoration-style: solid !important;
+    border-bottom: 1px solid currentColor !important;
+    box-shadow: 0 1px 0 0 currentColor !important;
+    cursor: pointer !important;
+    color: inherit !important;
+  }
+
+  /* Pseudo-elemento para crear subrayado visual que no puede ser sobrescrito fácilmente */
+  div[contenteditable="true"] a.blog-link::after,
+  div[contenteditable] a.blog-link::after,
+  [contenteditable="true"] a.blog-link::after,
+  [contenteditable] a.blog-link::after,
+  div[contenteditable="true"] a[href]::after,
+  div[contenteditable] a[href]::after,
+  [contenteditable="true"] a[href]::after,
+  [contenteditable] a[href]::after {
+    content: '' !important;
+    position: absolute !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 1px !important;
+    background-color: currentColor !important;
+    pointer-events: none !important;
+  }
+
+  div[contenteditable="true"] a.blog-link:hover,
+  div[contenteditable] a.blog-link:hover,
+  [contenteditable="true"] a.blog-link:hover,
+  [contenteditable] a.blog-link:hover,
+  div[contenteditable="true"] a[href]:hover,
+  div[contenteditable] a[href]:hover,
+  [contenteditable="true"] a[href]:hover,
+  [contenteditable] a[href]:hover {
+    opacity: 0.8;
+  }
+}
+

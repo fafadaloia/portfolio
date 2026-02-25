@@ -1,0 +1,123 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "about": "Sobre mí",
+    "projects": "Proyectos",
+    "services": "Servicios",
+    "blog": "Blog",
+    "contact": "Contacto"
+  },
+  "hero": {
+    "title": "Diseño experiencias digitales con propósito",
+    "subtitle": "",
+    "cta": "Ver proyectos destacados",
+    "about": "Soy programador freelance con tres años de experiencia creando sistemas inteligentes y plataformas automatizadas. Co-fundador de NeKa Labs y co-creador de Zeta AI. Desarrollo soluciones que combinan inteligencia artificial, diseño funcional y una visión enfocada en la experiencia del usuario."
+  },
+  "about": {
+    "title": "Sobre mí",
+    "description": "",
+    "body": [
+      "Soy técnico en computación y programador freelance con tres años de experiencia. A lo largo de mi carrera desarrollé proyectos diversos, desde un sistema de votación electrónico 100 % transparente y anónimo, hasta plataformas completas de automatización con inteligencia artificial.",
+      "Entre mis trabajos más destacados se encuentra Zeta AI, herramienta diseñada para que empresas y emprendimientos automaticen procesos: generación de imágenes y videos con IA, gestión de stock, publicación multicanal en e-commerce y redes sociales, y soporte multilingüe.",
+      "Mis principales herramientas son JavaScript, React.js, Node.js, Python, HTML y CSS. También tengo experiencia con Java, C, C#, C++, Basic, Pascal, SQL y algo de PHP.",
+      "Mi enfoque se basa en escuchar y entender la identidad de cada cliente. Busco crear soluciones que reflejen sus valores y que sean funcionales, intuitivas y visualmente limpias. Creo en trabajar codo a codo, en mejorar continuamente y en aportar siempre mi máximo nivel técnico y humano.",
+      "A corto plazo, mi meta es que Zeta AI crezca hasta convertirse en una herramienta reconocida a nivel global. A largo plazo, aspiro a desarrollar una inteligencia artificial propia dentro de NeKa Labs, continuando el camino de la innovación y la construcción de futuro."
+    ]
+  },
+  "projects": {
+    "title": "Proyectos destacados",
+    "description": "",
+    "labels": {
+      "viewMore": "Ver más",
+      "live": "Live",
+      "imageUnavailable": "Imagen no disponible"
+    },
+    "items": {
+      "zetaAi": {
+        "title": "Zeta AI",
+        "description": "Automatizá tu empresa o emprendimiento, con gestión de stock, generación con IA de imágenes y videos y publicación en tus plataformas favoritas."
+      },
+      "impolut": {
+        "title": "Impolut",
+        "description": "Plataforma de eliminación de fondos en alta definición que procesa imágenes mediante flujos de trabajo automatizados, entregando recursos limpios y listos para usar con rendimiento optimizado."
+      },
+      "raffle": {
+        "title": "rafflE",
+        "description": "Plataforma de rifas virtuales con increíbles premios en tus videojuegos y plataformas favoritas."
+      }
+    },
+    "tags": {
+      "ARTIFICIAL_INTELLIGENCE": "Inteligencia Artificial",
+      "REACT": "React",
+      "TAILWINDCSS": "TailwindCSS",
+      "FRAMER_MOTION": "Framer Motion",
+      "NODE": "Node",
+      "BACKGROUND_REMOVER": "Eliminador de Fondos",
+      "PYTHON": "Python",
+      "FASTAPI": "FastAPI",
+      "DOCKER": "Docker",
+      "AUTOMATION": "Automatización",
+      "HIGH_DEFINITION": "Alta Definición",
+      "COMPLETELY_FREE": "Completamente Gratis",
+      "GAMING": "Gaming",
+      "HTML": "HTML",
+      "CSS": "CSS",
+      "SECURE_PAYMENT": "Pago Seguro"
+    }
+  },
+  "services": {
+    "title": "Servicios",
+    "description": "",
+    "items": {
+      "ux": {
+        "title": "Diseño UX/UI",
+        "description": "Experiencias centradas en las personas con interfaces limpias y funcionales."
+      },
+      "web": {
+        "title": "Desarrollo web",
+        "description": "Aplicaciones web rápidas, accesibles y escalables."
+      },
+      "brand": {
+        "title": "Identidad digital",
+        "description": "Definición visual consistente alineada a los objetivos de cada marca."
+      }
+    }
+  },
+  "testimonials": {
+    "title": "Testimonios",
+    "description": "",
+    "items": [
+      {
+        "name": "Fernando",
+        "role": "Director de Latin-data",
+        "quote": "La colaboración fue impecable. El resultado superó expectativas y elevó nuestra presencia digital."
+      },
+      {
+        "name": "Gabriela",
+        "role": "Emprendedora (Gaby Sacks)",
+        "quote": "Proceso transparente, comunicación clara y un producto final que refleja nuestra identidad."
+      }
+    ]
+  },
+  "blog": {
+    "title": "Ideas recientes",
+    "description": ""
+  },
+  "contact": {
+    "title": "Colaboremos",
+    "description": "Utilizá el formulario de contacto para iniciar un proyecto o pedir más información.",
+    "button": "Enviar mensaje"
+  },
+  "footer": {
+    "copy": "Diseñado con intención. Construido con React."
+  },
+  "language": {
+    "es": "ES",
+    "en": "EN"
+  },
+  "theme": {
+    "light": "Claro",
+    "dark": "Oscuro"
+  }
+}
+
