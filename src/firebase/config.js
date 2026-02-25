@@ -37,7 +37,10 @@ try {
     }
   }
 } catch (error) {
-  // Error silencioso en producción
+  // Log del error para debugging
+  if (typeof window !== 'undefined') {
+    console.error('Error inicializando Firebase:', error);
+  }
 }
 
 export { auth, db };

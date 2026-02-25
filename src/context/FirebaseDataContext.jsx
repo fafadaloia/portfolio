@@ -108,7 +108,7 @@ export const FirebaseDataProvider = ({ children }) => {
         setBlogPosts(blogResult.data);
       }
     } catch (error) {
-      // Error silencioso
+      console.error('Error cargando datos de Firebase:', error);
     } finally {
       setLoading(false);
     }
