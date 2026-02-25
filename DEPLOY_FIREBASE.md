@@ -70,6 +70,7 @@ Asegúrate de tener configurados estos secrets en GitHub:
 - `VITE_FIREBASE_STORAGE_BUCKET`
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID` (opcional - para Analytics)
 - `VITE_GOOGLE_TRANSLATE_API_KEY`
 - `FIREBASE_SERVICE_ACCOUNT` (nuevo - para el deploy)
 
