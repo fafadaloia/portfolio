@@ -9,17 +9,15 @@ Para que el workflow de GitHub Actions funcione correctamente, necesitas configu
    https://github.com/fafadaloia/portfolio/settings/secrets/actions
    ```
 
-2. **Para cada secret, haz click en "New repository secret"** y configura:
+2. **Para cada secret, haz click en "New repository secret"** y configura los siguientes secrets con los valores de tu archivo `.env`:
 
-   | Secret Name | Valor (del archivo .env) |
-   |------------|--------------------------|
-   | `VITE_FIREBASE_API_KEY` | Tu API Key de Firebase |
-   | `VITE_FIREBASE_AUTH_DOMAIN` | Tu Auth Domain de Firebase |
-   | `VITE_FIREBASE_PROJECT_ID` | Tu Project ID de Firebase |
-   | `VITE_FIREBASE_STORAGE_BUCKET` | Tu Storage Bucket de Firebase |
-   | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Tu Messaging Sender ID |
-   | `VITE_FIREBASE_APP_ID` | Tu App ID de Firebase |
-   | `VITE_GOOGLE_TRANSLATE_API_KEY` | Tu API Key de Google Translate |
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
+   - `VITE_GOOGLE_TRANSLATE_API_KEY`
 
 3. **Click en "Add secret"** para cada uno
 
