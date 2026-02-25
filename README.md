@@ -38,13 +38,24 @@ Portfolio personal desarrollado con React, Vite, Tailwind CSS y Firebase.
 4. Ejecutar en desarrollo: `npm run dev`
 5. Build para producción: `npm run build`
 
-## GitHub Pages
+## Firebase Hosting
 
-El proyecto está configurado para desplegarse automáticamente en GitHub Pages mediante GitHub Actions.
+El proyecto está configurado para desplegarse automáticamente en Firebase Hosting: **https://portfolio-eb263.web.app**
+
+### Deploy Manual
+
+```bash
+npm run build
+npm run deploy
+```
+
+### Deploy Automático
+
+El proyecto se despliega automáticamente en cada push a `main` mediante GitHub Actions.
 
 ### Configuración de Secrets
 
-Para que el build funcione correctamente, necesitas configurar los siguientes secrets en GitHub:
+Para que el build y deploy funcionen correctamente, necesitas configurar los siguientes secrets en GitHub:
 - `VITE_FIREBASE_API_KEY`
 - `VITE_FIREBASE_AUTH_DOMAIN`
 - `VITE_FIREBASE_PROJECT_ID`
@@ -52,12 +63,9 @@ Para que el build funcione correctamente, necesitas configurar los siguientes se
 - `VITE_FIREBASE_MESSAGING_SENDER_ID`
 - `VITE_FIREBASE_APP_ID`
 - `VITE_GOOGLE_TRANSLATE_API_KEY`
+- `FIREBASE_SERVICE_ACCOUNT` (para el deploy automático)
 
-### Habilitar GitHub Pages
-
-1. Ve a Settings > Pages en tu repositorio
-2. Selecciona "GitHub Actions" como fuente
-3. El workflow se ejecutará automáticamente en cada push a `main`
+Ver `DEPLOY_FIREBASE.md` para instrucciones detalladas.
 
 ## Estructura del Proyecto
 
