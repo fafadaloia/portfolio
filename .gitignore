@@ -36,3 +36,10 @@ dist-ssr
 roketto.css
 rokketo.css
 SECRETS_VALUES.txt
+
+# Firebase
+.firebase
+.firebaserc
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
