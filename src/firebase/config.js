@@ -1,8 +1,8 @@
 // Configuración de Firebase
-// Reemplazá estos valores con tus credenciales de Firebase
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -11,6 +11,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 // Verificar que las variables de entorno estén configuradas
@@ -22,6 +23,7 @@ const isFirebaseConfigured =
 let app = null;
 let auth = null;
 let db = null;
+let analytics = null;
 
 try {
   if (isFirebaseConfigured) {
@@ -30,6 +32,18 @@ try {
     // Inicializar servicios
     auth = getAuth(app);
     db = getFirestore(app);
+    
+    // Inicializar Analytics solo en el cliente (navegador)
+    if (typeof window !== 'undefined') {
+      try {
+        analytics = getAnalytics(app);
+      } catch (analyticsError) {
+        // Analytics puede fallar en desarrollo o si no está configurado
+        if (import.meta.env.DEV) {
+          console.warn('Analytics no disponible:', analyticsError);
+        }
+      }
+    }
     
     // Log para verificar configuración (solo en desarrollo)
     if (import.meta.env.DEV) {
@@ -43,5 +57,5 @@ try {
   }
 }
 
-export { auth, db };
+export { auth, db, analytics };
 export default app;
