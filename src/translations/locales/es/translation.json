@@ -32,6 +32,16 @@
       "live": "Live",
       "imageUnavailable": "Imagen no disponible"
     },
+    "detail": {
+      "history": "Historia",
+      "description": "Descripción",
+      "technologies": "Tecnologías",
+      "haveQuestion": "Tengo una pregunta",
+      "backToProjects": "Volver a proyectos",
+      "loading": "Cargando proyecto...",
+      "notFound": "Proyecto no encontrado",
+      "redirecting": "Redirigiendo a proyectos..."
+    },
     "items": {
       "zetaAi": {
         "title": "Zeta AI",

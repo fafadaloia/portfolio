@@ -9,13 +9,16 @@ import {
   FiArrowUp,
   FiArrowDown,
   FiX,
+  FiUpload,
 } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { getProjects, createProject, updateProject, deleteProject } from '../../firebase/services/projects';
 import { translateText, isTranslateAvailable } from '../../services/translate';
+import { uploadImage, getStorageUrlFromPath } from '../../firebase/services/storage';
 import { useModal } from '../hooks/useModal';
 import Modal from './Modal';
 import Toast from './Toast';
+import RichTextEditor from './RichTextEditor';
 
 // Tags disponibles basados en el archivo de traducciones
 const AVAILABLE_TAGS = [
@@ -47,6 +50,8 @@ const ProjectsManager = () => {
     id: '',
     title: '',
     description: '',
+    shortHistory: '',
+    extendedDescription: '',
     techStack: [],
     repositoryUrl: '',
     repositoryLabel: 'GitHub',
@@ -57,6 +62,8 @@ const ProjectsManager = () => {
     displayOrder: 0,
     hidden: false,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     loadProjects();
@@ -74,6 +81,8 @@ const ProjectsManager = () => {
       id: '',
       title: '',
       description: '',
+      shortHistory: '',
+      extendedDescription: '',
       techStack: [],
       repositoryUrl: '',
       repositoryLabel: 'GitHub',
@@ -86,11 +95,95 @@ const ProjectsManager = () => {
     });
     setEditingId(null);
     setShowForm(false);
+    setImagePreview(null);
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    // Actualizar preview si es el campo de imagen
+    if (name === 'image' && value) {
+      setImagePreview(value);
+    } else if (name === 'image' && !value) {
+      setImagePreview(null);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar que sea una imagen
+    if (!file.type.startsWith('image/')) {
+      showError('El archivo debe ser una imagen');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showError('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      // Generar nombre basado en el título del proyecto si está disponible
+      const fileName = formData.title 
+        ? formData.title.toLowerCase().replace(/[^a-z0-9]/g, '-')
+        : null;
+
+      const result = await uploadImage(file, 'admin/proyects', fileName);
+
+      if (result.success) {
+        setFormData((prev) => ({
+          ...prev,
+          image: result.url,
+        }));
+        setImagePreview(result.url);
+        showSuccess('Imagen subida correctamente');
+      } else {
+        showError('Error al subir la imagen: ' + result.error);
+      }
+    } catch (error) {
+      showError('Error al subir la imagen: ' + error.message);
+    } finally {
+      setUploadingImage(false);
+      // Limpiar el input para permitir subir el mismo archivo de nuevo
+      e.target.value = '';
+    }
+  };
+
+  const handleImagePathBlur = async (e) => {
+    const value = e.target.value.trim();
+    if (!value) return;
+
+    // Si ya es una URL completa (http/https), no hacer nada
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return;
+    }
+
+    // Si parece una ruta relativa de Storage (no empieza con /)
+    // y contiene 'admin/testimonies' o 'admin/proyects'
+    if (value.includes('admin/')) {
+      setUploadingImage(true);
+      try {
+        const result = await getStorageUrlFromPath(value);
+        if (result.success) {
+          setFormData((prev) => ({
+            ...prev,
+            image: result.url,
+          }));
+          setImagePreview(result.url);
+        } else {
+          // Si falla, dejar el valor como está (puede ser una ruta local)
+        }
+      } catch (error) {
+        // Si falla, dejar el valor como está
+      } finally {
+        setUploadingImage(false);
+      }
+    }
   };
 
   const handleTagToggle = (tag) => {
@@ -114,14 +207,17 @@ const ProjectsManager = () => {
     
     if (isTranslateAvailable()) {
       const translations = await Promise.all([
-        translateText(formData.title, 'en', 'es'),
-        translateText(formData.description, 'en', 'es'),
+        translateText(formData.description, 'en', 'es', true), // Descripción con HTML
+        translateText(formData.shortHistory || '', 'en', 'es', true), // Historia con HTML
+        translateText(formData.extendedDescription || '', 'en', 'es', false), // Descripción extendida sin HTML (texto plano)
       ]);
 
       projectEn = {
         ...formData,
-        title: translations[0].success ? translations[0].translatedText : formData.title,
-        description: translations[1].success ? translations[1].translatedText : formData.description,
+        title: formData.title, // El título NO se traduce, se mantiene igual en ambos idiomas
+        description: translations[0].success ? translations[0].translatedText : formData.description,
+        shortHistory: translations[1].success ? translations[1].translatedText : formData.shortHistory,
+        extendedDescription: translations[2].success ? translations[2].translatedText : formData.extendedDescription,
       };
     }
 
@@ -150,6 +246,7 @@ const ProjectsManager = () => {
     setFormData({ ...project });
     setEditingId(project.id);
     setShowForm(true);
+    setImagePreview(project.image || null);
   };
 
   const handleDelete = async (id) => {
@@ -279,32 +376,112 @@ const ProjectsManager = () => {
             </div>
 
             <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-              Descripción
-              <textarea
-                name="description"
+              Descripción breve (para la card)
+              <RichTextEditor
                 value={formData.description}
-                onChange={handleInputChange}
-                rows={3}
-                required
-                className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
+                onChange={(html) => setFormData((prev) => ({ ...prev, description: html }))}
+                placeholder="Escribí la descripción breve del proyecto..."
+                minHeight="120px"
               />
               <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
-                Se traducirá automáticamente al inglés al guardar.
+                Se traducirá automáticamente al inglés al guardar. Los links solo funcionarán en la página del proyecto, no en la card.
               </p>
             </label>
 
-            <div className="grid gap-4 sm:grid-cols-2">
+            <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+              Historia breve (para la página del proyecto)
+              <RichTextEditor
+                value={formData.shortHistory}
+                onChange={(html) => setFormData((prev) => ({ ...prev, shortHistory: html }))}
+                placeholder="Escribí la historia breve del proyecto..."
+                minHeight="150px"
+              />
+              <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                Historia breve del proyecto que aparecerá en la página individual.
+              </p>
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+              Descripción extendida (para la página del proyecto)
+              <textarea
+                name="extendedDescription"
+                value={formData.extendedDescription}
+                onChange={handleInputChange}
+                rows={10}
+                placeholder="Escribí la descripción extendida del proyecto...&#10;&#10;Separá los párrafos con una línea en blanco."
+                className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
+                style={{ whiteSpace: 'pre-wrap' }}
+              />
+              <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                Descripción detallada del proyecto que aparecerá en la página individual. Separá los párrafos con una línea en blanco. Se traducirá automáticamente al inglés al guardar.
+              </p>
+            </label>
+
+            <div className="space-y-4">
               <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-                URL de imagen
+                Imagen del proyecto
+                <div className="flex gap-2">
+                  <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary/20 bg-white/80 px-4 py-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark dark:hover:text-primary">
+                    <FiUpload size={16} />
+                    {uploadingImage ? 'Subiendo...' : 'Subir imagen'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                  Subí una imagen desde tu computadora o ingresá una URL manualmente abajo.
+                </p>
+              </label>
+
+              {imagePreview && (
+                <div className="flex items-center gap-4 rounded-lg border border-primary/20 bg-white/80 p-3 dark:border-primary/30 dark:bg-darkBg/70">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="h-24 w-24 rounded-lg object-cover"
+                    onError={() => setImagePreview(null)}
+                  />
+                  <div className="flex-1">
+                    <p className="text-xs text-linkLight/60 dark:text-linkDark/60">Vista previa</p>
+                    <p className="truncate text-xs text-linkLight/80 dark:text-linkDark/80">{imagePreview}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, image: '' }));
+                      setImagePreview(null);
+                    }}
+                    className="text-linkLight/60 hover:text-red-500 dark:text-linkDark/60"
+                  >
+                    <FiX size={18} />
+                  </button>
+                </div>
+              )}
+
+              <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+                O ingresá una URL manualmente
                 <input
                   type="text"
                   name="image"
                   value={formData.image}
                   onChange={handleInputChange}
-                  placeholder="/images/proyectos/mi-proyecto.png"
+                  onBlur={handleImagePathBlur}
+                  placeholder="admin/proyects/logo.png o https://ejemplo.com/imagen.jpg"
                   className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
                 />
+                <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                  Podés ingresar una ruta de Storage (ej: admin/proyects/logo.png) o una URL completa.
+                  {uploadingImage && ' Convirtiendo ruta...'}
+                </p>
               </label>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
                 Orden de visualización
                 <input

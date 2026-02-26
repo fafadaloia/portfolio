@@ -3,6 +3,17 @@ import { db } from '../config';
 
 const BLOG_COLLECTION = 'portfolio/admin/blog';
 
+// Normalizar título a slug (minúsculas, sin espacios, en inglés)
+export const normalizeToSlug = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '');
+};
+
 // Convertir artículo de Firebase a formato del frontend
 const firebaseToFrontend = (firebaseDoc) => {
   const data = firebaseDoc.data();
@@ -17,14 +28,10 @@ const firebaseToFrontend = (firebaseDoc) => {
     content: data.body || '',
     publishedAt: postDate ? postDate.toISOString().split('T')[0] : '',
     imagesURL: data.imagesURL || '',
-    slug: title
-      ? title
-          .toLowerCase()
-          .normalize('NFD')
-          .replace(/[\u0300-\u036f]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/[^a-z0-9-]/g, '')
-      : '',
+    tags: data.tags || [],
+    views: data.views || 0,
+    likes: data.likes || 0,
+    slug: normalizeToSlug(title),
     readingTime: data.body
       ? `${Math.max(3, Math.round(data.body.replace(/<[^>]*>/g, '').split(' ').length / 200))} min`
       : '3 min',
@@ -44,6 +51,7 @@ const frontendToFirebase = (article) => {
     metatitle: article.metaTitle || article.summary || '',
     body: article.content || '',
     imagesURL: article.imagesURL || '',
+    tags: article.tags || [],
     postDate: postDate,
     isPublic: article.status === 'published' || article.isPublic || false,
   };
@@ -230,6 +238,65 @@ export const getPublicBlogPosts = async (language = 'es', publicOnly = true) => 
         return { success: false, error: fallbackError.message, data: [] };
       }
     }
+    return { success: false, error: error.message, data: [] };
+  }
+};
+
+// Obtener un artículo por slug
+export const getArticleBySlug = async (slug, language = 'es') => {
+  if (!db) {
+    return { success: false, error: 'Firebase no está configurado', data: null };
+  }
+  try {
+    const blogRef = collection(db, BLOG_COLLECTION, language, 'items');
+    const querySnapshot = await getDocs(query(blogRef, where('isPublic', '==', true)));
+    
+    const articles = querySnapshot.docs.map(firebaseToFrontend);
+    
+    // Buscar artículo por slug
+    const article = articles.find(a => normalizeToSlug(a.title) === slug);
+    
+    if (article) {
+      return { success: true, data: article };
+    }
+    
+    return { success: false, error: 'Artículo no encontrado', data: null };
+  } catch (error) {
+    return { success: false, error: error.message, data: null };
+  }
+};
+
+// Obtener artículos recomendados basados en tags
+export const getRecommendedArticles = async (currentArticleId, currentTags, language = 'es', limit = 3) => {
+  if (!db || !currentTags || currentTags.length === 0) {
+    return { success: true, data: [] };
+  }
+  try {
+    const blogRef = collection(db, BLOG_COLLECTION, language, 'items');
+    const querySnapshot = await getDocs(query(blogRef, where('isPublic', '==', true)));
+    
+    const articles = querySnapshot.docs.map(firebaseToFrontend);
+    
+    // Filtrar el artículo actual y calcular coincidencias de tags
+    const articlesWithMatches = articles
+      .filter(article => article.id !== currentArticleId)
+      .map(article => {
+        const matchingTags = article.tags.filter(tag => 
+          currentTags.some(currentTag => 
+            currentTag.toLowerCase() === tag.toLowerCase()
+          )
+        );
+        return {
+          ...article,
+          matchingTagsCount: matchingTags.length,
+        };
+      })
+      .filter(article => article.matchingTagsCount > 0) // Al menos 1 tag en común
+      .sort((a, b) => b.matchingTagsCount - a.matchingTagsCount) // Ordenar por más coincidencias
+      .slice(0, limit); // Limitar resultados
+    
+    return { success: true, data: articlesWithMatches };
+  } catch (error) {
     return { success: false, error: error.message, data: [] };
   }
 };

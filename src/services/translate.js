@@ -59,10 +59,43 @@ export const translateText = async (text, targetLang = 'es', sourceLang = 'auto'
     }
 
     const data = await response.json();
-    const translatedText = data.data?.translations?.[0]?.translatedText;
+    let translatedText = data.data?.translations?.[0]?.translatedText;
 
     if (!translatedText) {
       return { success: false, error: 'No se recibió traducción de la API' };
+    }
+
+    // Si es HTML, verificar y corregir la estructura HTML si es necesario
+    if (isHtml && translatedText) {
+      // Verificar si el texto traducido tiene etiquetas HTML
+      const hasHtmlTags = /<[^>]+>/.test(translatedText);
+      const originalHasHtmlTags = /<[^>]+>/.test(text);
+      
+      // Si el original tenía HTML pero el traducido no, intentar preservar la estructura básica
+      if (originalHasHtmlTags && !hasHtmlTags) {
+        // Extraer solo el texto del original (sin HTML)
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        const originalTextOnly = tempDiv.textContent || tempDiv.innerText || '';
+        
+        // Si el texto traducido es similar al texto original (solo traducido), 
+        // intentar aplicar la estructura HTML del original
+        // Esto es una aproximación simple
+        if (originalTextOnly.trim() && translatedText.trim()) {
+          // Intentar preservar párrafos y saltos de línea básicos
+          // Reemplazar saltos de línea múltiples con <br> o <p>
+          translatedText = translatedText
+            .replace(/\n\n+/g, '</p><p>')
+            .replace(/\n/g, '<br>');
+          
+          // Si el original tenía párrafos, envolver en <p>
+          if (text.includes('<p>') || text.includes('</p>')) {
+            if (!translatedText.startsWith('<p>')) {
+              translatedText = '<p>' + translatedText + '</p>';
+            }
+          }
+        }
+      }
     }
 
     return { success: true, translatedText };

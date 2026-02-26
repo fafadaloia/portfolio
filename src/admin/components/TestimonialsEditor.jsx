@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { FiPlus, FiEdit3, FiTrash2, FiStar, FiSave, FiX, FiArrowUp, FiArrowDown } from 'react-icons/fi';
+import { FiPlus, FiEdit3, FiTrash2, FiStar, FiSave, FiX, FiArrowUp, FiArrowDown, FiUpload, FiImage } from 'react-icons/fi';
 import { useTranslation } from 'react-i18next';
 import { getTestimonials, createTestimonial, updateTestimonial, deleteTestimonial } from '../../firebase/services/testimonials';
 import { translateText, isTranslateAvailable } from '../../services/translate';
+import { uploadImage, getStorageUrlFromPath } from '../../firebase/services/storage';
 import { useModal } from '../hooks/useModal';
 import Modal from './Modal';
 import Toast from './Toast';
@@ -21,6 +22,8 @@ const TestimonialsEditor = () => {
     featured: false,
     displayOrder: 0,
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null);
 
   useEffect(() => {
     loadTestimonials();
@@ -46,6 +49,7 @@ const TestimonialsEditor = () => {
     });
     setEditingId(null);
     setShowForm(false);
+    setAvatarPreview(null);
   };
 
   const handleInputChange = (e) => {
@@ -54,6 +58,83 @@ const TestimonialsEditor = () => {
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validar que sea una imagen
+    if (!file.type.startsWith('image/')) {
+      showError('El archivo debe ser una imagen');
+      return;
+    }
+
+    // Validar tamaño (máximo 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      showError('La imagen no debe superar los 5MB');
+      return;
+    }
+
+    setUploadingImage(true);
+
+    try {
+      // Generar nombre basado en el nombre del testimonio si está disponible
+      const fileName = formData.name 
+        ? formData.name.toLowerCase().replace(/[^a-z0-9]/g, '-')
+        : null;
+
+      const result = await uploadImage(file, 'admin/testimonies', fileName);
+
+      if (result.success) {
+        setFormData((prev) => ({
+          ...prev,
+          avatar: result.url,
+        }));
+        setAvatarPreview(result.url);
+        showSuccess('Imagen subida correctamente');
+      } else {
+        showError('Error al subir la imagen: ' + result.error);
+      }
+    } catch (error) {
+      showError('Error al subir la imagen: ' + error.message);
+    } finally {
+      setUploadingImage(false);
+      // Limpiar el input para permitir subir el mismo archivo de nuevo
+      e.target.value = '';
+    }
+  };
+
+  const handleAvatarPathBlur = async (e) => {
+    const value = e.target.value.trim();
+    if (!value) return;
+
+    // Si ya es una URL completa (http/https), no hacer nada
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return;
+    }
+
+    // Si parece una ruta relativa de Storage (no empieza con /)
+    // y contiene 'admin/testimonies' o 'admin/proyects'
+    if (value.includes('admin/')) {
+      setUploadingImage(true);
+      try {
+        const result = await getStorageUrlFromPath(value);
+        if (result.success) {
+          setFormData((prev) => ({
+            ...prev,
+            avatar: result.url,
+          }));
+          setAvatarPreview(result.url);
+        } else {
+          // Si falla, dejar el valor como está (puede ser una ruta local)
+        }
+      } catch (error) {
+        // Si falla, dejar el valor como está
+      } finally {
+        setUploadingImage(false);
+      }
+    }
   };
 
 
@@ -130,6 +211,7 @@ const TestimonialsEditor = () => {
     });
     setEditingId(testimonial.id);
     setShowForm(true);
+    setAvatarPreview(testimonial.avatar || null);
   };
 
   const handleDelete = async (id) => {
@@ -271,30 +353,85 @@ const TestimonialsEditor = () => {
               </p>
             </div>
 
-            <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-              URL del avatar (opcional)
-              <input
-                type="text"
-                name="avatar"
-                value={formData.avatar}
-                onChange={(e) => {
-                  let value = e.target.value;
-                  // Corregir automáticamente si el usuario ingresa /public/
-                  if (value.startsWith('/public/')) {
-                    value = value.replace('/public/', '/');
-                  }
-                  setFormData((prev) => ({
-                    ...prev,
-                    avatar: value,
-                  }));
-                }}
-                placeholder="/images/testimonios/testimonio-01.jpg"
-                className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
-              />
-              <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
-                La ruta debe empezar con / (ej: /images/testimonios/foto.jpg). No incluir /public/
-              </p>
-            </label>
+            <div className="space-y-4">
+              <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+                Avatar (opcional)
+                <div className="flex gap-2">
+                  <label className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg border border-primary/20 bg-white/80 px-4 py-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark dark:hover:text-primary">
+                    <FiUpload size={16} />
+                    {uploadingImage ? 'Subiendo...' : 'Subir imagen'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      disabled={uploadingImage}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                  Subí una imagen desde tu computadora o ingresá una URL manualmente abajo.
+                </p>
+              </label>
+
+              {avatarPreview && (
+                <div className="flex items-center gap-4 rounded-lg border border-primary/20 bg-white/80 p-3 dark:border-primary/30 dark:bg-darkBg/70">
+                  <img
+                    src={avatarPreview}
+                    alt="Preview"
+                    className="h-16 w-16 rounded-full object-cover"
+                    onError={() => setAvatarPreview(null)}
+                  />
+                  <div className="flex-1">
+                    <p className="text-xs text-linkLight/60 dark:text-linkDark/60">Vista previa</p>
+                    <p className="truncate text-xs text-linkLight/80 dark:text-linkDark/80">{avatarPreview}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData((prev) => ({ ...prev, avatar: '' }));
+                      setAvatarPreview(null);
+                    }}
+                    className="text-linkLight/60 hover:text-red-500 dark:text-linkDark/60"
+                  >
+                    <FiX size={18} />
+                  </button>
+                </div>
+              )}
+
+              <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+                O ingresá una URL manualmente
+                <input
+                  type="text"
+                  name="avatar"
+                  value={formData.avatar}
+                  onChange={(e) => {
+                    let value = e.target.value;
+                    // Corregir automáticamente si el usuario ingresa /public/
+                    if (value.startsWith('/public/')) {
+                      value = value.replace('/public/', '/');
+                    }
+                    setFormData((prev) => ({
+                      ...prev,
+                      avatar: value,
+                    }));
+                    // Actualizar preview si es una URL válida
+                    if (value) {
+                      setAvatarPreview(value);
+                    } else {
+                      setAvatarPreview(null);
+                    }
+                  }}
+                  onBlur={handleAvatarPathBlur}
+                  placeholder="admin/testimonies/face.jpg o https://ejemplo.com/imagen.jpg"
+                  className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
+                />
+                <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                  Podés ingresar una ruta de Storage (ej: admin/testimonies/face.jpg) o una URL completa.
+                  {uploadingImage && ' Convirtiendo ruta...'}
+                </p>
+              </label>
+            </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="flex items-center gap-2">

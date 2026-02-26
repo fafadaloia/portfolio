@@ -11,15 +11,12 @@ const BlogEditor = () => {
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
     titleEs: '',
-    metaTitle: '',
     metaTitleEs: '',
-    content: '',
     contentEs: '',
     publishedAt: '',
+    tags: '',
   });
-  const [translating, setTranslating] = useState({});
   const editorRefEs = useRef(null);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [linkUrl, setLinkUrl] = useState('');
@@ -27,7 +24,6 @@ const BlogEditor = () => {
   const [imageUrl, setImageUrl] = useState('');
   const [imageCaption, setImageCaption] = useState('');
   const [editingLink, setEditingLink] = useState(null);
-  const editorRef = useRef(null);
   const linkDialogRef = useRef(null);
   const imageDialogRef = useRef(null);
   const { modal, toast, showSuccess, showError, showInfo, showConfirm, closeModal, closeToast } = useModal();
@@ -44,17 +40,17 @@ const BlogEditor = () => {
   };
 
   useEffect(() => {
-    if (showForm && editorRef.current) {
-      const content = formData.content || '';
-      editorRef.current.innerHTML = content;
+    if (showForm && editorRefEs.current) {
+      const content = formData.contentEs || '';
+      editorRefEs.current.innerHTML = content;
       
       // Forzar dirección LTR
-      editorRef.current.setAttribute('dir', 'ltr');
-      editorRef.current.style.direction = 'ltr';
-      editorRef.current.style.textAlign = 'left';
+      editorRefEs.current.setAttribute('dir', 'ltr');
+      editorRefEs.current.style.direction = 'ltr';
+      editorRefEs.current.style.textAlign = 'left';
       
       // Agregar estilos y asegurar que los links sean editables
-      const links = editorRef.current.querySelectorAll('a');
+      const links = editorRefEs.current.querySelectorAll('a');
       links.forEach((link) => {
         link.className = 'blog-link';
         // Aplicar estilos con !important incluyendo border-bottom
@@ -72,7 +68,7 @@ const BlogEditor = () => {
       if (!content.trim()) {
         const range = document.createRange();
         const selection = window.getSelection();
-        range.selectNodeContents(editorRef.current);
+        range.selectNodeContents(editorRefEs.current);
         range.collapse(false);
         selection.removeAllRanges();
         selection.addRange(range);
@@ -82,10 +78,10 @@ const BlogEditor = () => {
   
   // Efecto separado para cuando cambia el contenido (al editar)
   useEffect(() => {
-    if (showForm && editorRef.current && editingId) {
+    if (showForm && editorRefEs.current && editingId) {
       // Aplicar estilos a links después de cargar
       setTimeout(() => {
-        const links = editorRef.current.querySelectorAll('a');
+        const links = editorRefEs.current.querySelectorAll('a');
         links.forEach((link) => {
           link.className = 'blog-link';
           link.style.textDecoration = 'underline';
@@ -95,12 +91,12 @@ const BlogEditor = () => {
         });
       }, 0);
     }
-  }, [formData.content, editingId, showForm]);
+  }, [formData.contentEs, editingId, showForm]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!showForm || !editorRef.current) return;
-      if (!editorRef.current.contains(document.activeElement) && document.activeElement !== editorRef.current) return;
+      if (!showForm || !editorRefEs.current) return;
+      if (!editorRefEs.current.contains(document.activeElement) && document.activeElement !== editorRefEs.current) return;
 
       // Ctrl+B: Bold
       if (e.ctrlKey && e.key === 'b') {
@@ -135,15 +131,16 @@ const BlogEditor = () => {
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      metaTitle: '',
-      content: '',
+      titleEs: '',
+      metaTitleEs: '',
+      contentEs: '',
       publishedAt: new Date().toISOString().split('T')[0],
+      tags: '',
     });
     setEditingId(null);
     setShowForm(false);
-    if (editorRef.current) {
-      editorRef.current.innerHTML = '';
+    if (editorRefEs.current) {
+      editorRefEs.current.innerHTML = '';
     }
   };
 
@@ -153,13 +150,13 @@ const BlogEditor = () => {
   };
 
   const handleContentChange = () => {
-    if (editorRef.current) {
+    if (editorRefEs.current) {
       // Asegurar que siempre tenga dirección LTR
-      editorRef.current.setAttribute('dir', 'ltr');
-      editorRef.current.style.direction = 'ltr';
+      editorRefEs.current.setAttribute('dir', 'ltr');
+      editorRefEs.current.style.direction = 'ltr';
       
       // Asegurar que todos los links tengan los estilos correctos antes de guardar
-      const links = editorRef.current.querySelectorAll('a');
+      const links = editorRefEs.current.querySelectorAll('a');
       links.forEach((link) => {
         link.className = 'blog-link';
         // Aplicar estilos con !important usando setProperty
@@ -170,7 +167,7 @@ const BlogEditor = () => {
         link.style.setProperty('color', 'inherit', 'important');
       });
       
-      setFormData((prev) => ({ ...prev, content: editorRef.current.innerHTML }));
+      setFormData((prev) => ({ ...prev, contentEs: editorRefEs.current.innerHTML }));
     }
   };
 
@@ -183,16 +180,16 @@ const BlogEditor = () => {
   };
 
   const handleEditorFocus = () => {
-    if (editorRef.current) {
-      editorRef.current.setAttribute('dir', 'ltr');
-      editorRef.current.style.direction = 'ltr';
-      editorRef.current.style.textAlign = 'left';
+    if (editorRefEs.current) {
+      editorRefEs.current.setAttribute('dir', 'ltr');
+      editorRefEs.current.style.direction = 'ltr';
+      editorRefEs.current.style.textAlign = 'left';
     }
   };
 
   const handleFormat = (command) => {
     document.execCommand(command, false, null);
-    editorRef.current?.focus();
+    editorRefEs.current?.focus();
     handleContentChange();
   };
 
@@ -247,7 +244,7 @@ const BlogEditor = () => {
       setEditingLink(null);
       setShowLinkDialog(false);
       setLinkUrl('');
-      editorRef.current?.focus();
+      editorRefEs.current?.focus();
       handleContentChange();
       return;
     }
@@ -305,7 +302,7 @@ const BlogEditor = () => {
           // Forzar repaint
           void link.offsetHeight;
         }
-        editorRef.current?.focus();
+        editorRefEs.current?.focus();
         handleContentChange();
       }, 50);
     }
@@ -346,7 +343,7 @@ const BlogEditor = () => {
       showError('Ingresá una URL de imagen válida');
       return;
     }
-    if (editorRef.current) {
+    if (editorRefEs.current) {
       const selection = window.getSelection();
       const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : document.createRange();
       
@@ -380,13 +377,13 @@ const BlogEditor = () => {
       }
 
       // Insertar al final del contenido
-      if (editorRef.current.innerHTML.trim()) {
-        editorRef.current.appendChild(document.createElement('br'));
+      if (editorRefEs.current.innerHTML.trim()) {
+        editorRefEs.current.appendChild(document.createElement('br'));
       }
-      editorRef.current.appendChild(imageContainer);
-      editorRef.current.appendChild(document.createElement('br'));
+      editorRefEs.current.appendChild(imageContainer);
+      editorRefEs.current.appendChild(document.createElement('br'));
 
-      editorRef.current.focus();
+      editorRefEs.current.focus();
       handleContentChange();
     }
     setShowImageDialog(false);
@@ -394,63 +391,144 @@ const BlogEditor = () => {
     setImageCaption('');
   };
 
-  const handleSave = async () => {
-    // Traducir automáticamente si hay contenido en español pero no en inglés
-    let finalFormData = { ...formData };
+  // Función para limpiar y normalizar los links en el HTML
+  const cleanLinksInHtml = (html) => {
+    if (!html) return html;
     
-    if (isTranslateAvailable()) {
-      // Si falta título en inglés pero hay en español, traducir
-      if (!finalFormData.title && finalFormData.titleEs) {
-        const result = await translateText(finalFormData.titleEs, 'en', 'es');
-        if (result.success) {
-          finalFormData.title = result.translatedText;
+    // Crear un elemento temporal para procesar el HTML
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    // Encontrar todos los links
+    const links = tempDiv.querySelectorAll('a');
+    links.forEach((link) => {
+      // Remover contenteditable si existe
+      link.removeAttribute('contenteditable');
+      
+      // Obtener el href actual
+      let href = link.getAttribute('href') || link.href || '';
+      
+      // Si no tiene href, intentar obtenerlo del texto si es una URL
+      if (!href) {
+        const textContent = link.textContent || link.innerText || '';
+        if (textContent.match(/^https?:\/\//)) {
+          href = textContent.trim();
         }
       }
       
-      // Si falta metaTitle en inglés pero hay en español, traducir
-      if (!finalFormData.metaTitle && finalFormData.metaTitleEs) {
-        const result = await translateText(finalFormData.metaTitleEs, 'en', 'es');
-        if (result.success) {
-          finalFormData.metaTitle = result.translatedText;
+      // Si aún no hay href, saltar este link
+      if (!href) {
+        // Convertir el link en texto plano
+        const textNode = document.createTextNode(link.textContent || link.innerText || '');
+        link.parentNode?.replaceChild(textNode, link);
+        return;
+      }
+      
+      // Asegurar que tenga href válido
+      link.setAttribute('href', href);
+      
+      // Asegurar target y rel para links externos
+      if (href.startsWith('http://') || href.startsWith('https://') || href.startsWith('//')) {
+        if (!link.getAttribute('target')) {
+          link.setAttribute('target', '_blank');
+        }
+        if (!link.getAttribute('rel')) {
+          link.setAttribute('rel', 'noopener noreferrer');
         }
       }
       
-      // Si falta content en inglés pero hay en español, traducir (HTML)
-      const htmlContentEs = editorRefEs.current?.innerHTML || finalFormData.contentEs;
-      const htmlContent = editorRef.current?.innerHTML || finalFormData.content;
-      if (!htmlContent && htmlContentEs) {
-        const result = await translateText(htmlContentEs, 'en', 'es', true); // isHtml = true
-        if (result.success) {
-          if (editorRef.current) {
-            editorRef.current.innerHTML = result.translatedText;
-          }
-          finalFormData.content = result.translatedText;
+      // Remover spans innecesarios dentro del link y mover su contenido directamente al link
+      const spans = link.querySelectorAll('span');
+      spans.forEach((span) => {
+        // Mover el contenido del span al link
+        while (span.firstChild) {
+          link.insertBefore(span.firstChild, span);
         }
+        // Remover el span
+        span.remove();
+      });
+      
+      // Limpiar estilos inline que puedan interferir, pero mantener la clase
+      link.className = 'blog-link';
+      link.removeAttribute('style');
+      
+      // Asegurar que el link tenga contenido de texto
+      if (!link.textContent && !link.innerText) {
+        link.textContent = href;
       }
-    }
+    });
+    
+    return tempDiv.innerHTML;
+  };
 
-    // Validar que al menos los campos en inglés estén completos (o se hayan traducido)
-    const htmlContent = editorRef.current?.innerHTML || finalFormData.content;
-    if (!finalFormData.title || !finalFormData.metaTitle || !htmlContent) {
-      showError('Por favor completá todos los campos requeridos');
+  const handleSave = async () => {
+    // Obtener el contenido HTML del editor en español
+    let htmlContentEs = editorRefEs.current?.innerHTML || formData.contentEs || '';
+    
+    // Limpiar y normalizar los links
+    htmlContentEs = cleanLinksInHtml(htmlContentEs);
+    
+    const titleEs = formData.titleEs || '';
+    const metaTitleEs = formData.metaTitleEs || '';
+
+    // Validar que los campos en español estén completos
+    if (!titleEs || !metaTitleEs || !htmlContentEs) {
+      showError('Por favor completá todos los campos requeridos (título, meta título y contenido)');
       return;
     }
 
+    // Procesar tags (separar por comas y limpiar)
+    const tagsArray = formData.tags
+      ? formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
+      : [];
+
+    // Preparar datos del artículo en español
     const articleData = {
-      title: finalFormData.title,
-      titleEs: finalFormData.titleEs || '',
-      metaTitle: finalFormData.metaTitle,
-      metaTitleEs: finalFormData.metaTitleEs || '',
-      summary: finalFormData.metaTitle,
-      content: htmlContent,
-      contentEs: editorRefEs.current?.innerHTML || finalFormData.contentEs || '',
-      publishedAt: finalFormData.publishedAt || new Date().toISOString().split('T')[0],
+      title: titleEs,
+      titleEs: titleEs,
+      metaTitle: metaTitleEs,
+      metaTitleEs: metaTitleEs,
+      summary: metaTitleEs,
+      content: htmlContentEs,
+      contentEs: htmlContentEs,
+      tags: tagsArray,
+      publishedAt: formData.publishedAt || new Date().toISOString().split('T')[0],
       status: 'published',
       isPublic: true,
     };
 
+    // Traducir automáticamente al inglés
+    let articleEn = null;
+    
+    if (isTranslateAvailable()) {
+      const translations = await Promise.all([
+        translateText(titleEs, 'en', 'es', false), // Título sin HTML
+        translateText(metaTitleEs, 'en', 'es', false), // Meta título sin HTML
+        translateText(htmlContentEs, 'en', 'es', true), // Contenido con HTML
+      ]);
+
+      articleEn = {
+        title: translations[0].success ? translations[0].translatedText : titleEs,
+        titleEs: titleEs,
+        metaTitle: translations[1].success ? translations[1].translatedText : metaTitleEs,
+        metaTitleEs: metaTitleEs,
+        summary: translations[1].success ? translations[1].translatedText : metaTitleEs,
+        content: translations[2].success ? translations[2].translatedText : htmlContentEs,
+        contentEs: htmlContentEs,
+        tags: tagsArray, // Los tags se mantienen iguales en ambos idiomas
+        publishedAt: articleData.publishedAt,
+        status: 'published',
+        isPublic: true,
+      };
+    } else {
+      // Si no hay traducción disponible, usar el mismo contenido
+      articleEn = {
+        ...articleData,
+      };
+    }
+
     if (editingId) {
-      const result = await updateBlogPost(editingId, articleData);
+      const result = await updateBlogPost(editingId, articleData, articleEn);
       if (result.success) {
         await loadArticles();
         showSuccess('Artículo actualizado correctamente');
@@ -459,7 +537,7 @@ const BlogEditor = () => {
         showError('Error al actualizar: ' + result.error);
       }
     } else {
-      const result = await createBlogPost(articleData);
+      const result = await createBlogPost(articleData, articleEn);
       if (result.success) {
         await loadArticles();
         showSuccess('Artículo creado correctamente');
@@ -471,25 +549,21 @@ const BlogEditor = () => {
   };
 
   const handleEdit = (article) => {
+    // Cargar solo los campos en español (o usar los de inglés si no hay español)
     setFormData({
-      title: article.title || '',
-      titleEs: article.titleEs || '',
-      metaTitle: article.metaTitle || article.summary || '',
-      metaTitleEs: article.metaTitleEs || '',
-      content: article.content || article.summary || '',
-      contentEs: article.contentEs || '',
+      titleEs: article.titleEs || article.title || '',
+      metaTitleEs: article.metaTitleEs || article.metaTitle || article.summary || '',
+      contentEs: article.contentEs || article.content || '',
       publishedAt: article.publishedAt || new Date().toISOString().split('T')[0],
+      tags: article.tags ? article.tags.join(', ') : '',
     });
     setEditingId(article.id);
     setShowForm(true);
     
-    // Cargar contenido HTML en los editores
+    // Cargar contenido HTML en el editor
     setTimeout(() => {
-      if (editorRef.current) {
-        editorRef.current.innerHTML = article.content || '';
-      }
       if (editorRefEs.current) {
-        editorRefEs.current.innerHTML = article.contentEs || '';
+        editorRefEs.current.innerHTML = article.contentEs || article.content || '';
       }
     }, 100);
   };
@@ -558,198 +632,99 @@ const BlogEditor = () => {
             className="space-y-4"
           >
             <div className="space-y-4">
-              <div>
-                <div className="mb-3 flex items-center justify-between">
-                  <h4 className="text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-                    Inglés (requerido)
-                  </h4>
-                  {(formData.titleEs || formData.metaTitleEs || formData.contentEs) && (
-                    <button
-                      type="button"
-                      onClick={async () => {
-                        if (!isTranslateAvailable()) {
-                          alert('Google Translate API no está configurada.');
-                          return;
-                        }
-                        setTranslating({ title: true, metaTitle: true, content: true });
-                        const translations = await Promise.all([
-                          formData.titleEs ? translateText(formData.titleEs, 'en', 'es') : Promise.resolve({ success: false }),
-                          formData.metaTitleEs ? translateText(formData.metaTitleEs, 'en', 'es') : Promise.resolve({ success: false }),
-                          formData.contentEs ? translateText(editorRefEs.current?.innerHTML || formData.contentEs, 'en', 'es', true) : Promise.resolve({ success: false }),
-                        ]);
-                        setFormData(prev => ({
-                          ...prev,
-                          title: translations[0].success ? translations[0].translatedText : prev.title,
-                          metaTitle: translations[1].success ? translations[1].translatedText : prev.metaTitle,
-                          content: translations[2].success ? translations[2].translatedText : prev.content,
-                        }));
-                        if (translations[2].success && editorRef.current) {
-                          editorRef.current.innerHTML = translations[2].translatedText;
-                        }
-                        setTranslating({});
-                      }}
-                      disabled={translating.title || translating.metaTitle || translating.content}
-                      className="inline-flex items-center gap-1 rounded-lg border border-primary/20 px-2 py-1 text-xs uppercase tracking-widest text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent disabled:opacity-50 dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
-                      title="Traducir campos en español a inglés"
-                    >
-                      <FiGlobe size={12} />
-                      {translating.title || translating.metaTitle || translating.content ? 'Traduciendo...' : 'Traducir'}
-                    </button>
-                  )}
-                </div>
-                <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-                  Título del artículo
-                  <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleInputChange}
-                    required
-                    placeholder="Ej. Minimalist Design Trends 2025"
-                    className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
-                  />
-                </label>
+              <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+                Título del artículo
+                <input
+                  type="text"
+                  name="titleEs"
+                  value={formData.titleEs}
+                  onChange={handleInputChange}
+                  required
+                  placeholder="Ej. Tendencias de diseño minimalista 2025"
+                  className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
+                />
+                <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                  Se traducirá automáticamente al inglés al guardar.
+                </p>
+              </label>
 
-                <label className="mt-4 flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-                  Metatítulo breve (resumen)
-                  <textarea
-                    name="metaTitle"
-                    value={formData.metaTitle}
-                    onChange={handleInputChange}
-                    rows={3}
-                    required
-                    placeholder="Brief description that appears in lists and previews..."
-                    className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
-                  />
-                  <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
-                    Este texto aparece como resumen en las listas de artículos.
-                  </p>
-                </label>
-              </div>
-
-              <div>
-                <h4 className="mb-3 text-sm font-semibold uppercase tracking-widest text-linkLight/60 dark:text-linkDark/60">
-                  Español (opcional, se traduce automáticamente al inglés)
-                </h4>
-                <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-                  Título del artículo
-                  <input
-                    type="text"
-                    name="titleEs"
-                    value={formData.titleEs}
-                    onChange={handleInputChange}
-                    placeholder="Ej. Tendencias de diseño minimalista 2025"
-                    className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
-                  />
-                </label>
-
-                <label className="mt-4 flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-                  Metatítulo breve (resumen)
-                  <textarea
-                    name="metaTitleEs"
-                    value={formData.metaTitleEs}
-                    onChange={handleInputChange}
-                    rows={3}
-                    placeholder="Breve descripción que aparece en las listas y previews..."
-                    className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
-                  />
-                </label>
-              </div>
+              <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+                Metatítulo breve (resumen)
+                <textarea
+                  name="metaTitleEs"
+                  value={formData.metaTitleEs}
+                  onChange={handleInputChange}
+                  rows={3}
+                  required
+                  placeholder="Breve descripción que aparece en las listas y previews..."
+                  className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
+                />
+                <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                  Este texto aparece como resumen en las listas de artículos. Se traducirá automáticamente al inglés al guardar.
+                </p>
+              </label>
             </div>
 
             <div className="space-y-4">
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <label className="block text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
-                    Cuerpo del artículo - Inglés
+                    Cuerpo del artículo
                   </label>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => handleFormat('bold')}
-                    className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
-                    title="Negrita (Ctrl+B)"
-                  >
-                    <FiBold size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFormat('italic')}
-                    className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
-                    title="Cursiva (Ctrl+I)"
-                  >
-                    <FiItalic size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleFormat('underline')}
-                    className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
-                    title="Subrayado (Ctrl+U)"
-                  >
-                    <FiUnderline size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleLinkShortcut}
-                    className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
-                    title="Agregar link (Ctrl+K)"
-                  >
-                    <FiLink size={16} />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleImageShortcut}
-                    className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
-                    title="Agregar imagen (Ctrl+P)"
-                  >
-                    <FiImage size={16} />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('bold')}
+                      className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
+                      title="Negrita (Ctrl+B)"
+                    >
+                      <FiBold size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('italic')}
+                      className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
+                      title="Cursiva (Ctrl+I)"
+                    >
+                      <FiItalic size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleFormat('underline')}
+                      className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
+                      title="Subrayado (Ctrl+U)"
+                    >
+                      <FiUnderline size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleLinkShortcut}
+                      className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
+                      title="Agregar link (Ctrl+K)"
+                    >
+                      <FiLink size={16} />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleImageShortcut}
+                      className="rounded-lg border border-primary/20 p-2 text-linkLight transition-colors duration-200 hover:border-primary hover:text-accent dark:border-primary/30 dark:text-linkDark dark:hover:text-primary"
+                      title="Agregar imagen (Ctrl+P)"
+                    >
+                      <FiImage size={16} />
+                    </button>
+                  </div>
                 </div>
-              </div>
-              <div
-                ref={editorRef}
-                contentEditable
-                dir="ltr"
-                onInput={handleContentChange}
-                onBlur={handleContentChange}
-                onKeyDown={handleEditorKeyDown}
-                onFocus={handleEditorFocus}
-                onClick={handleEditorClick}
-                onMouseDown={handleEditorMouseDown}
-                data-placeholder="Escribí el contenido completo del artículo aquí..."
-                className="admin-blog-editor min-h-[300px] rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark [&:empty:before]:content-[attr(data-placeholder)] [&:empty:before]:text-linkLight/50 [&:empty:before]:dark:text-linkDark/50"
-                style={{
-                  whiteSpace: 'pre-wrap',
-                  wordWrap: 'break-word',
-                  direction: 'ltr',
-                  textAlign: 'left',
-                  unicodeBidi: 'embed',
-                }}
-              />
-                <p className="mt-1 text-xs text-linkLight/60 dark:text-linkDark/60">
-                  Usá los botones de formato o los shortcuts: Ctrl+B (negrita), Ctrl+I (cursiva), Ctrl+U (subrayado), Ctrl+K (link), Ctrl+P (imagen).
-                </p>
-              </div>
-
-              <div>
-                <label className="mb-2 block text-sm font-semibold uppercase tracking-widest text-linkLight/60 dark:text-linkDark/60">
-                  Cuerpo del artículo - Español (opcional, se traduce automáticamente al inglés)
-                </label>
                 <div
                   ref={editorRefEs}
                   contentEditable
                   dir="ltr"
-                  onInput={() => {
-                    if (editorRefEs.current) {
-                      setFormData(prev => ({ ...prev, contentEs: editorRefEs.current.innerHTML }));
-                    }
-                  }}
-                  onBlur={() => {
-                    if (editorRefEs.current) {
-                      setFormData(prev => ({ ...prev, contentEs: editorRefEs.current.innerHTML }));
-                    }
-                  }}
-                  data-placeholder="Escribí el contenido completo del artículo en español aquí..."
+                  onInput={handleContentChange}
+                  onBlur={handleContentChange}
+                  onKeyDown={handleEditorKeyDown}
+                  onFocus={handleEditorFocus}
+                  onClick={handleEditorClick}
+                  onMouseDown={handleEditorMouseDown}
+                  data-placeholder="Escribí el contenido completo del artículo aquí..."
                   className="admin-blog-editor min-h-[300px] rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark [&:empty:before]:content-[attr(data-placeholder)] [&:empty:before]:text-linkLight/50 [&:empty:before]:dark:text-linkDark/50"
                   style={{
                     whiteSpace: 'pre-wrap',
@@ -760,7 +735,7 @@ const BlogEditor = () => {
                   }}
                 />
                 <p className="mt-1 text-xs text-linkLight/60 dark:text-linkDark/60">
-                  Podés escribir en español y se traducirá automáticamente al inglés al guardar.
+                  Usá los botones de formato o los shortcuts: Ctrl+B (negrita), Ctrl+I (cursiva), Ctrl+U (subrayado), Ctrl+K (link), Ctrl+P (imagen). Se traducirá automáticamente al inglés al guardar.
                 </p>
               </div>
             </div>
@@ -777,6 +752,21 @@ const BlogEditor = () => {
                 onChange={handleInputChange}
                 className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
               />
+            </label>
+
+            <label className="flex flex-col gap-2 text-sm font-semibold uppercase tracking-widest text-linkLight/80 dark:text-linkDark/80">
+              Tags
+              <input
+                type="text"
+                name="tags"
+                value={formData.tags}
+                onChange={handleInputChange}
+                placeholder="Ej: diseño, desarrollo, react, javascript (separados por comas)"
+                className="rounded-lg border border-primary/20 bg-white/80 px-3 py-2 text-linkLight transition-colors duration-200 focus:border-primary focus:outline-none dark:border-primary/30 dark:bg-darkBg/70 dark:text-linkDark"
+              />
+              <p className="text-xs text-linkLight/60 dark:text-linkDark/60">
+                Separá los tags con comas. Se usarán para recomendaciones de artículos relacionados.
+              </p>
             </label>
 
             <div className="flex justify-end gap-3">

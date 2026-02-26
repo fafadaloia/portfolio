@@ -35,3 +35,39 @@
 .admin-blog-editor a[href] {
   position: relative !important;
 }
+
+/* Asegurar que el editor muestre el texto normalmente (sin uppercase) */
+.admin-blog-editor {
+  text-transform: none !important;
+  font-variant: normal !important;
+  letter-spacing: normal !important;
+}
+
+.admin-blog-editor * {
+  text-transform: none !important;
+}
+
+/* Asegurar que los elementos dentro del editor mantengan su formato */
+.admin-blog-editor strong,
+.admin-blog-editor b {
+  font-weight: bold !important;
+}
+
+.admin-blog-editor em,
+.admin-blog-editor i {
+  font-style: italic !important;
+}
+
+.admin-blog-editor u {
+  text-decoration: underline !important;
+}
+
+.admin-blog-editor p {
+  margin: 0.5em 0 !important;
+}
+
+.admin-blog-editor br {
+  display: block !important;
+  content: "" !important;
+  margin: 0.5em 0 !important;
+}

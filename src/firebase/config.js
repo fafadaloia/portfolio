@@ -2,6 +2,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 import { getAnalytics } from 'firebase/analytics';
 
 const firebaseConfig = {
@@ -23,6 +24,7 @@ const isFirebaseConfigured =
 let app = null;
 let auth = null;
 let db = null;
+let storage = null;
 let analytics = null;
 
 try {
@@ -32,6 +34,7 @@ try {
     // Inicializar servicios
     auth = getAuth(app);
     db = getFirestore(app);
+    storage = getStorage(app);
     
     // Inicializar Analytics solo en el cliente (navegador)
     if (typeof window !== 'undefined') {
@@ -57,5 +60,5 @@ try {
   }
 }
 
-export { auth, db, analytics };
+export { auth, db, storage, analytics };
 export default app;

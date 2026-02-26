@@ -83,7 +83,7 @@
     outline: none;
   }
 
-  /* Estilos para imágenes del blog */
+  /* Estilos para imágenes del blog y proyectos */
   .blog-image-container {
     margin: 1rem 0;
   }
@@ -101,6 +101,116 @@
     opacity: 0.7;
     margin-top: 0.5rem;
     text-align: center;
+  }
+
+  /* Estilos para links en contenido renderizado (no solo editor) */
+  .prose a,
+  [class*="prose"] a,
+  .prose a[href],
+  [class*="prose"] a[href],
+  .prose a.blog-link,
+  [class*="prose"] a.blog-link {
+    text-decoration: underline !important;
+    text-decoration-line: underline !important;
+    color: inherit;
+    cursor: pointer !important;
+    pointer-events: auto !important;
+    transition: opacity 0.2s;
+  }
+
+  .prose a:hover,
+  [class*="prose"] a:hover,
+  .prose a[href]:hover,
+  [class*="prose"] a[href]:hover,
+  .prose a.blog-link:hover,
+  [class*="prose"] a.blog-link:hover {
+    opacity: 0.8;
+  }
+
+  /* Estilos para contenido HTML enriquecido - MÁXIMA PRIORIDAD */
+  /* Sobrescribir cualquier estilo de prose que pueda interferir */
+  .prose strong,
+  [class*="prose"] strong,
+  .prose b,
+  [class*="prose"] b,
+  div[class*="prose"] strong,
+  div[class*="prose"] b,
+  section strong,
+  section b,
+  section[class*="prose"] strong,
+  section[class*="prose"] b,
+  strong,
+  b {
+    font-weight: 700 !important;
+    font-weight: bold !important;
+  }
+
+  .prose em,
+  [class*="prose"] em,
+  .prose i,
+  [class*="prose"] i,
+  div[class*="prose"] em,
+  div[class*="prose"] i,
+  section em,
+  section i,
+  section[class*="prose"] em,
+  section[class*="prose"] i,
+  em,
+  i {
+    font-style: italic !important;
+  }
+
+  .prose u,
+  [class*="prose"] u,
+  div[class*="prose"] u,
+  section u,
+  section[class*="prose"] u,
+  u {
+    text-decoration: underline !important;
+  }
+
+  /* Estilos adicionales para asegurar que se apliquen */
+  section .prose strong,
+  section .prose b,
+  section strong,
+  section b {
+    font-weight: 700 !important;
+    font-weight: bold !important;
+  }
+
+  section .prose em,
+  section .prose i,
+  section em,
+  section i {
+    font-style: italic !important;
+  }
+
+  /* Asegurar que los párrafos y saltos de línea se muestren correctamente */
+  .prose p,
+  [class*="prose"] p {
+    margin: 0.75em 0 !important;
+    line-height: 1.6 !important;
+  }
+
+  .prose br,
+  [class*="prose"] br {
+    display: block !important;
+    content: "" !important;
+    margin: 0.5em 0 !important;
+  }
+
+  /* Asegurar que el contenido HTML renderizado mantenga el formato */
+  [class*="prose"] * {
+    text-transform: none !important;
+  }
+
+  /* Estilos para imágenes en contenido renderizado */
+  .prose img,
+  [class*="prose"] img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.5rem;
+    margin: 1rem 0;
   }
 
   /* Estilos para links en el editor de blog - MÁXIMA PRIORIDAD */
@@ -151,6 +261,21 @@
   [contenteditable="true"] a[href]:hover,
   [contenteditable] a[href]:hover {
     opacity: 0.8;
+  }
+
+  /* Estilos para la descripción del proyecto: párrafos y líneas */
+  .project-description .project-paragraph {
+    line-height: 1.5 !important;
+  }
+
+  .project-description .project-line {
+    line-height: 1 !important;
+    margin: 0;
+    padding: 0;
+  }
+
+  .project-description .project-line:not(:last-child) {
+    margin-bottom: 0.25em;
   }
 }
 
